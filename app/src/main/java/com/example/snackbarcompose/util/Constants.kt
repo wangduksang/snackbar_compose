@@ -14,13 +14,14 @@ object Constants {
 
     const val BUNDLES_INFO_TABLE = "bundles_info"
 
-    const val ITEMS_TABLE = "items"
+    const val CATEGORY_TABLE = "category"
 
     const val ITEM_TABLE = "item"
 
     const val DATABASE_NAME = "snap_bar_database"
 
     const val SPLASH_SCREEN = "splash"
+
     const val DASHBOARD_SCREEN = "dashboard/{action}"
 
     const val ARGUMENT_KEY = "action"

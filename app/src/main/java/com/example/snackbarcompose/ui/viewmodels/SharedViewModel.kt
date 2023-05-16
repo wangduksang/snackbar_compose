@@ -32,7 +32,7 @@ class SharedViewModel @Inject constructor(
             title = "Daily quests",
             priority = Priority.HIGH,
             decorType = ItemDecorType.IMAGE_SINGLE_OVERLAPPING_TEXT.type,
-            itemList = itemList1,
+            //itemList = itemList1,
         )
 
         val category1Str = category1.toString()
@@ -77,7 +77,7 @@ class SharedViewModel @Inject constructor(
             title = "Popular items",
             priority = Priority.HIGH,
             decorType = ItemDecorType.IMAGE_SINGLE_NARROW.type,
-            itemList = itemList2,
+            //itemList = itemList2,
         )
 
         val item31 = Item(
@@ -108,7 +108,7 @@ class SharedViewModel @Inject constructor(
             title = "Popular items",
             priority = Priority.MEDIUM,
             decorType = ItemDecorType.IMAGE_SINGLE_WIDE.type,
-            itemList = itemList3,
+            //itemList = itemList3,
         )
 
         val item41 = Item(
@@ -135,7 +135,7 @@ class SharedViewModel @Inject constructor(
             title = "Mystery bundles",
             priority = Priority.MEDIUM,
             decorType = ItemDecorType.IMAGE_GRID_4_SEASONAL_BUNDLE.type,
-            itemList = itemList4,
+            //itemList = itemList4,
         )
 
         val item51 = Item(
@@ -165,7 +165,7 @@ class SharedViewModel @Inject constructor(
             title = "Mystery bundles",
             priority = Priority.LOW,
             decorType = ItemDecorType.IMAGE_GRID_4_SEASONAL_BUNDLE.type,
-            itemList = itemList5,
+            //itemList = itemList5,
         )
 
         val categoryList = arrayListOf(category1, category2, category3, category4, category5)
