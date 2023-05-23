@@ -24,15 +24,15 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         Log.d("wds","hello world")
         // runtime exp
-        sharedViewModel.makeMockData()
+
 
         setContent {
             SnackbarComposeTheme {
 
-                navController = rememberAnimatedNavController()
-                SetupNavigation(
-                    navController = navController
-                )
+//                navController = rememberAnimatedNavController()
+//                SetupNavigation(
+//                    navController = navController
+//                )
 
 //                Surface(
 //                    modifier = Modifier.fillMaxSize(),

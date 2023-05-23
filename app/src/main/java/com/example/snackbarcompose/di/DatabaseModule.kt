@@ -25,7 +25,7 @@ object DatabaseModule {
         DATABASE_NAME
     ).build()
 
-//    @Singleton
-//    @Provides
-//    fun provideDao(database: ToDoDatabase) = database.toDoDao()
+    @Singleton
+    @Provides
+    fun provideDao(database: SnackBarDatabase) = database.weatherDao()
 }
