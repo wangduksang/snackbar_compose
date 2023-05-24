@@ -75,6 +75,7 @@ dependencies {
     implementation ("com.squareup.retrofit2:adapter-rxjava2:2.7.1")
     implementation ("com.google.code.gson:gson:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:3.9.0")
     implementation ("com.opencsv:opencsv:5.5.2")
 
     // DI

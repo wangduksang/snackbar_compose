@@ -10,6 +10,9 @@ data class Location(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     @ColumnInfo(name = "name")
-    val location: String = "",
-    val priority: Priority,
+    var name: String = "",
+    @ColumnInfo(name = "lon")
+    var longitude: Float = 0.0F,
+    @ColumnInfo(name = "lat")
+    var latitude: Float = 0.0F,
 )

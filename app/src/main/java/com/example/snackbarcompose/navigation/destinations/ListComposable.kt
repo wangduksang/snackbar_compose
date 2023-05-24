@@ -5,7 +5,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navArgument
-import com.example.snackbarcompose.ui.viewmodels.SharedViewModel
 import com.example.snackbarcompose.util.Constants.DASHBOARD_SCREEN
 import com.example.snackbarcompose.util.Constants.ARGUMENT_KEY
 import com.example.snackbarcompose.util.toAction
