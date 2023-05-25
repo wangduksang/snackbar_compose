@@ -8,17 +8,40 @@ import com.example.snackbarcompose.data.models.Weather
 @Dao
 interface WeatherDao {
 
+    @Transaction
     @Query("SELECT * FROM location_table JOIN weather_table ON location_table.id = weather_table.location_id")
     fun getAllWeatherData(): Flow<Map<Location, List<Weather>>>
 
+
+    @Transaction
+    suspend fun addLocationAndWeatherList(location: Location, weatherList: List<Weather>) {
+        deleteWeatherData()
+        val locationId = addLocation(location)
+        weatherList.forEach { weather ->
+            weather.locationId = locationId
+            addWeather(weather)
+        }
+    }
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun addLocation(location: Location)
+    suspend fun addLocation(location: Location): Long
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun addWeather(weather: Weather)
 
-//    @Update
-//    suspend fun updateTask(toDoTask: ToDoTask)
+    @Transaction
+    @Delete
+    suspend fun deleteWeatherData(){
+        deleteWeather()
+        deleteLocation()
+    }
+
+    @Query("DELETE FROM location_table")
+    suspend fun deleteLocation()
+
+    @Query("DELETE FROM weather_table")
+    suspend fun deleteWeather()
+
 
 //    @Query(
 //        "SELECT * FROM location_table JOIN weather_table ON location_table.id = weather_table.location_id " +

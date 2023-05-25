@@ -9,9 +9,13 @@ import com.example.snackbarcompose.data.remote.WeatherResponse
 import com.example.snackbarcompose.data.repositories.WeatherRepository
 import com.example.snackbarcompose.network.WeatherApi
 import com.example.snackbarcompose.util.Constants.APP_KEY
+import com.example.snackbarcompose.util.RequestState
+import com.example.snackbarcompose.util.getCelcius
 import com.example.snackbarcompose.util.getDateString
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -39,63 +43,104 @@ class WeatherViewModel @Inject constructor(
     val weatherList = arrayListOf<WeatherParam>()
 
     init {
-        weatherList.add(WeatherParam(37.5600F, 126.9900F, APP_KEY))
+
+        weatherList.add(WeatherParam(37.5519F, 126.9918F, APP_KEY))
         weatherList.add(WeatherParam(51.5072F, -0.1275F, APP_KEY))
         weatherList.add(WeatherParam(41.8375F, -87.6866F, APP_KEY))
     }
 
-    // reqeust datasource .. DB or API
+    // hot flow
+    // mutable to immutable
+    private val _allWeatherData =
+        MutableStateFlow<RequestState<Map<Location, List<Weather>>>>(RequestState.Idle)
+    val allWeatherData: StateFlow<RequestState<Map<Location, List<Weather>>>> = _allWeatherData
+
+    fun bindWeatherDataWithDB() {
+        _allWeatherData.value = RequestState.Loading
+        try {
+            viewModelScope.launch {
+                repository.getAllDataMap.collect {
+                    _allWeatherData.value = RequestState.Success(it)
+                }
+            }
+        } catch (e: Exception) {
+            _allWeatherData.value = RequestState.Error(e)
+        }
+    }
+
     fun requestWeatherApi() {
+
+        // check db
 
         viewModelScope.launch {
             // consume
             weatherFlowList.collect { resp ->
                 //println("data => $resp")
-                // 5일치
-
-                val location = Location()
-                resp.city?.apply {
-                    location.name = name.toString()
-                    location.longitude = coord?.lon as Float
-                    location.latitude = coord?.lat as Float
-                }
-
-                repository.addLocation(location = location)
-
-                val weatherHashMap = HashMap<String, ListItem>()
-
-                resp.list?.let { list ->
-                    list.map { item ->
-                        if (item != null) {
-                            item.day = toDay(item)
-                        }
-                    }
-
-                    list.forEach { item ->
-                        if (item != null) {
-                            weatherHashMap[item.day] = item
-                        }
-                    }
-                }
-
-                val weatherList = weatherHashMap.toList().take(SHOW_LIST_CNT)
-
-                weatherList.forEach { list ->
-
-                    val weather = Weather().apply {
-                        val item = list.second
-
-                        item.main.apply {
-                            tempMin = tempMin as? Float ?: 0.0F
-                            tempMax = tempMin as? Float ?: 0.0F
-                        }
-                        dt = item.dtTxt.toString()
-                    }
-                    repository.addWeather(weather = weather)
-                }
+                // 5day
+                addLocationAndWeatherListToRepo(resp)
+//                val locationId = addLocationToRepo(resp)
+//                println("locationId :  $locationId")
+//                addWeatherToRepo(locationId, resp)
             }
         }
     }
+
+    // 3times
+    private suspend fun addLocationAndWeatherListToRepo(resp: WeatherResponse) {
+
+        val location = Location()
+        resp.city?.apply {
+            println("city name :  ${name.toString()}")
+            location.name = name.toString()
+
+            location.longitude = coord?.lon as Double
+            location.latitude = coord?.lat as Double
+
+            println("city longitude :  ${location.longitude}")
+            println("city latitude :  ${location.latitude}")
+        }
+
+        val weatherHashMap = HashMap<String, ListItem>()
+
+        resp.list?.let { list ->
+            list.map { item ->
+                if (item != null) {
+                    item.day = toDay(item)
+                }
+            }
+
+            list.forEach { item ->
+                if (item != null) {
+                    weatherHashMap[item.day] = item
+                }
+            }
+        }
+
+        val weatherList = ArrayList<Weather>()
+        weatherHashMap.toList().take(SHOW_LIST_CNT).forEach { list ->
+
+            val weather = Weather().apply {
+                val item = list.second
+                var main = item.main
+
+                tempMin = getCelcius(main?.tempMin as Double)
+                tempMax = getCelcius(main.tempMax as Double)
+
+//                println("tempMin :  $tempMin")
+//                println("tempMax :  $tempMax")
+
+                dt = item.dtTxt.toString()
+            }
+            weatherList.add(weather)
+
+        }
+        repository.addLocationAndWeatherList(location = location, weatherList = weatherList)
+    }
+
+//    private suspend fun addLocationToRepo(resp: WeatherResponse): Long {
+//
+//        return repository.addLocation(location = location)
+//    }
 
     //weatherFlowList.launchIn(viewModelScope)
 
@@ -104,7 +149,7 @@ class WeatherViewModel @Inject constructor(
         val dateTime: Int = if (listItem != null)
             listItem.dt!! else -1
         val dateTimeStr = getDateString(dateTime)
-        println("date time => $dateTimeStr")
+        //println("date time => $dateTimeStr")
         return dateTimeStr
     }
 

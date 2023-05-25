@@ -19,13 +19,11 @@ data class Weather(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     @ColumnInfo(name = "location_id")
-    val locationId: String = "",
-    @ColumnInfo(name = "description")
-    val description: String = "",
+    var locationId: Long = 0,
     @ColumnInfo(name = "temp_min")
-    var tempMin: Float = 0.0F,
+    var tempMin: Double = 0.0,
     @ColumnInfo(name = "temp_max")
-    var tempMax: Float = 0.0F,
+    var tempMax: Double = 0.0,
     @ColumnInfo(name = "dt")
     var dt: String = "",
 )

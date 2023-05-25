@@ -11,3 +11,5 @@ fun getDateString(time: Long) : String = simpleDateOnlyDayFormat.format(time * 1
 
 fun getDateString(time: Int) : String = simpleDateOnlyDayFormat.format(time * 1000L)
 
+//fun getCelcius(fahrenheit : Double) : Double =  5f / 9 * (fahrenheit - 32)
+fun getCelcius(fahrenheit : Double) : Double = fahrenheit - 273

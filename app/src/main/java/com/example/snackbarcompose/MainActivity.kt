@@ -7,9 +7,15 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.navigation.NavHostController
+import com.example.snackbarcompose.data.models.Location
+import com.example.snackbarcompose.data.models.Weather
 import com.example.snackbarcompose.ui.theme.SnackbarComposeTheme
 import com.example.snackbarcompose.ui.viewmodels.WeatherViewModel
+import com.example.snackbarcompose.util.RequestState
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import kotlin.coroutines.EmptyCoroutineContext
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -20,9 +26,25 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d("wds","hello world")
+        Log.d("wds", "hello world")
         // runtime exp
         weatherViewModel.requestWeatherApi()
+        weatherViewModel.bindWeatherDataWithDB()
+
+        val scope = CoroutineScope(EmptyCoroutineContext)
+        scope.launch {
+            weatherViewModel.allWeatherData.collect { requestState ->
+                if (requestState is RequestState.Success<*>) {
+                    val data = requestState.data as Map<Location, List<Weather>>
+                    val iterator = data.iterator()
+
+                    while (iterator.hasNext()) {
+                        val locMap = iterator.next()
+                        println(" locMap.key => $locMap")
+                    }
+                }
+            }
+        }
 
         setContent {
             SnackbarComposeTheme {

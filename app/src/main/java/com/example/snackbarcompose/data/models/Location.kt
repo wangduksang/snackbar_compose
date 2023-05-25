@@ -12,7 +12,7 @@ data class Location(
     @ColumnInfo(name = "name")
     var name: String = "",
     @ColumnInfo(name = "lon")
-    var longitude: Float = 0.0F,
+    var longitude: Double = 0.0,
     @ColumnInfo(name = "lat")
-    var latitude: Float = 0.0F,
+    var latitude: Double = 0.0,
 )
