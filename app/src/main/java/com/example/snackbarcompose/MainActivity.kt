@@ -29,6 +29,7 @@ class MainActivity : ComponentActivity() {
         weatherViewModel.requestWeatherApi()
         weatherViewModel.bindWeatherDataWithDB()
 
+        // for data test
         val scope = CoroutineScope(EmptyCoroutineContext)
         lateinit var data : Map<Location, List<Weather>>
         scope.launch {

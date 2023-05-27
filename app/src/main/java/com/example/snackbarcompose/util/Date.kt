@@ -13,3 +13,18 @@ fun getDateString(time: Int) : String = simpleDateOnlyDayFormat.format(time * 10
 
 //fun getCelcius(fahrenheit : Double) : Double =  5f / 9 * (fahrenheit - 32)
 fun getCelcius(fahrenheit : Double) : Double = fahrenheit - 273
+
+//sealed class WeatherDecorType(value : String) {
+//    abstract fun getImage() : Int
+//
+//    class None(value : String) : WeatherDecorType(value) {
+//        override fun getImage(): Int {
+//            return R.drawable.ic_wi_na
+//        }
+//    }
+//
+//    class LightRain(value : String) : WeatherDecorType(value) {
+//        override fun getImage(): Int {
+//            return R.drawable.ic_wi_showers
+//        }
+//    }
