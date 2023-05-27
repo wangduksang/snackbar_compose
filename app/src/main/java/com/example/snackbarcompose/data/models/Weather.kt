@@ -24,6 +24,8 @@ data class Weather(
     var tempMin: Double = 0.0,
     @ColumnInfo(name = "temp_max")
     var tempMax: Double = 0.0,
+    @ColumnInfo(name = "state")
+    var state: String = "",
     @ColumnInfo(name = "dt")
     var dt: String = "",
 )

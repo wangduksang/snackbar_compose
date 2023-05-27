@@ -6,9 +6,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.navigation.NavHostController
 import com.example.snackbarcompose.data.models.Location
 import com.example.snackbarcompose.data.models.Weather
+import com.example.snackbarcompose.ui.screens.dashboard.WeatherContent
 import com.example.snackbarcompose.ui.theme.SnackbarComposeTheme
 import com.example.snackbarcompose.ui.viewmodels.WeatherViewModel
 import com.example.snackbarcompose.util.RequestState
@@ -20,18 +20,17 @@ import kotlin.coroutines.EmptyCoroutineContext
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private lateinit var navController: NavHostController
     private val weatherViewModel: WeatherViewModel by viewModels()
 
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d("wds", "hello world")
-        // runtime exp
+
         weatherViewModel.requestWeatherApi()
         weatherViewModel.bindWeatherDataWithDB()
 
         val scope = CoroutineScope(EmptyCoroutineContext)
+        lateinit var data : Map<Location, List<Weather>>
         scope.launch {
             weatherViewModel.allWeatherData.collect { requestState ->
                 if (requestState is RequestState.Success<*>) {
@@ -48,18 +47,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             SnackbarComposeTheme {
-
-//                navController = rememberAnimatedNavController()
-//                SetupNavigation(
-//                    navController = navController
-//                )
-
-//                Surface(
-//                    modifier = Modifier.fillMaxSize(),
-//                    color = MaterialTheme.colorScheme.background
-//                ) {
-//                    Greeting("Android")
-//                }
+                WeatherContent(weatherViewModel)
             }
         }
     }

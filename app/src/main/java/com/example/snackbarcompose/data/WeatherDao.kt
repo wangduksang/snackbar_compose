@@ -12,7 +12,6 @@ interface WeatherDao {
     @Query("SELECT * FROM location_table JOIN weather_table ON location_table.id = weather_table.location_id")
     fun getAllWeatherData(): Flow<Map<Location, List<Weather>>>
 
-
     @Transaction
     suspend fun addLocationAndWeatherList(location: Location, weatherList: List<Weather>) {
         deleteWeatherData()
@@ -41,17 +40,4 @@ interface WeatherDao {
 
     @Query("DELETE FROM weather_table")
     suspend fun deleteWeather()
-
-
-//    @Query(
-//        "SELECT * FROM location_table JOIN weather_table ON location_table.id = weather_table.location_id " +
-//                "ORDER BY CASE WHEN priority LIKE 'L%' THEN 1 WHEN priority LIKE 'M%' THEN 2 WHEN priority LIKE 'H%' THEN 3 END"
-//    )
-//    fun sortByLowPriority(): Flow<Map<Location, List<Weather>>>
-//
-//    @Query(
-//        "SELECT * FROM location_table JOIN weather_table ON location_table.id = weather_table.location_id " +
-//                "ORDER BY CASE WHEN priority LIKE 'H%' THEN 1 WHEN priority LIKE 'M%' THEN 2 WHEN priority LIKE 'L%' THEN 3 END"
-//    )
-//    fun sortByHighPriority(): Flow<Map<Location, List<Weather>>>
 }

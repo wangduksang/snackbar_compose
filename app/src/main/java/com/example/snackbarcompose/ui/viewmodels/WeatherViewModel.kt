@@ -122,10 +122,12 @@ class WeatherViewModel @Inject constructor(
             val weather = Weather().apply {
                 val item = list.second
                 var main = item.main
+                var weather = item.weather?.get(0)
 
                 tempMin = getCelcius(main?.tempMin as Double)
                 tempMax = getCelcius(main.tempMax as Double)
 
+                state = weather?.main ?: ""
 //                println("tempMin :  $tempMin")
 //                println("tempMax :  $tempMax")
 
