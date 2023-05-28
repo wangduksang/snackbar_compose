@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -33,9 +35,13 @@ import com.example.snackbarcompose.data.models.Location
 import com.example.snackbarcompose.data.models.LocationWeather
 import com.example.snackbarcompose.data.models.Weather
 import com.example.snackbarcompose.data.models.constance.WeatherDecorType
+import com.example.snackbarcompose.ui.theme.DarkGray
+import com.example.snackbarcompose.ui.theme.LowPriorityColor
+import com.example.snackbarcompose.ui.theme.MediumGray
 import com.example.snackbarcompose.ui.viewmodels.WeatherViewModel
 import com.example.snackbarcompose.ui.viewmodels.WeatherViewModel.Companion.locationWeatherList
 import com.example.snackbarcompose.ui.viewmodels.WeatherViewModel.Companion.weatherBufferList
+import com.example.snackbarcompose.util.Constants.MEDIUM_PADDING
 import com.example.snackbarcompose.util.RequestState
 import com.example.snackbarcompose.util.U_CODE_CELCIUS
 import kotlin.math.roundToInt
@@ -64,6 +70,11 @@ fun WeatherContent(weatherViewModel: WeatherViewModel) {
 
                 //println("location : ${location.name} weather list.size => ${weatherList.size}")
                 stickyHeader {
+                    Divider(
+                        modifier = Modifier.height(MEDIUM_PADDING),
+                        color = LowPriorityColor
+                    )
+
                     Text(
                         text = location,
                         color = Color.White,
@@ -72,7 +83,13 @@ fun WeatherContent(weatherViewModel: WeatherViewModel) {
                             .padding(8.dp)
                             .fillMaxWidth()
                     )
+
+                    Divider(
+                        modifier = Modifier.height(MEDIUM_PADDING),
+                        color = LowPriorityColor
+                    )
                 }
+
                 items(
                     items = weatherList,
                 ) { weather ->
@@ -189,6 +206,11 @@ private fun WeatherListItem(
                 )
             }
         }
+
+        Divider(
+            modifier = Modifier.height(MEDIUM_PADDING),
+            color = MediumGray
+        )
     }
 }
 
