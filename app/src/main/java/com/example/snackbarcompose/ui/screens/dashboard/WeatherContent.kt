@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -63,9 +65,11 @@ fun WeatherContent(weatherViewModel: WeatherViewModel) {
             it.name
         }
         println("weatherBufferList ${weatherBufferList.size}")
-
+        val state = rememberLazyListState()
         LazyColumn {
+
             groupedItem.forEach { (location, weatherList) ->
+                val lastIdx = weatherList.lastIndex
                 println("draw lazy column")
 
                 //println("location : ${location.name} weather list.size => ${weatherList.size}")
@@ -90,12 +94,16 @@ fun WeatherContent(weatherViewModel: WeatherViewModel) {
                     )
                 }
 
-                items(
-                    items = weatherList,
-                ) { weather ->
+//                if (state.firstVisibleItemIndex == state.layoutInfo.visibleItemsInfo.size - 1) {
+//                    println("Last visible item is actually the last item")
+//                }
+
+                itemsIndexed(weatherList) { index, weather ->
                     WeatherListItem(
                         item = weather,
-                        weatherViewModel = weatherViewModel
+                        weatherViewModel = weatherViewModel,
+                        index = index,
+                        lastIdx = lastIdx
                     )
                 }
             }
@@ -106,13 +114,17 @@ fun WeatherContent(weatherViewModel: WeatherViewModel) {
 @Composable
 private fun WeatherListItem(
     item: LocationWeather,
-    weatherViewModel: WeatherViewModel
+    weatherViewModel: WeatherViewModel,
+    index: Int,
+    lastIdx: Int,
 ) {
 
     var isLoading by remember { mutableStateOf(true) }
 
     val sortedDate = weatherViewModel.getDayOfTheWeek(item.dt)
     println("sortedDate => $sortedDate")
+
+    println("index => $index lastIdx => $lastIdx")
 
     Column {
 
@@ -206,15 +218,15 @@ private fun WeatherListItem(
                 )
             }
         }
-
-        Divider(
-            modifier = Modifier.height(MEDIUM_PADDING),
-            color = MediumGray
-        )
+        if (index != lastIdx) {
+            Divider(
+                modifier = Modifier.height(MEDIUM_PADDING),
+                color = MediumGray
+            )
+        }
     }
 }
 
-@Composable
 private fun getImageUrl(item: LocationWeather): Int {
     println("item.state => $item.state")
     val imageUrl = when (item.state) {

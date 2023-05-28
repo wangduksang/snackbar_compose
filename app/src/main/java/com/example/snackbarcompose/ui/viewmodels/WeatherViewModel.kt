@@ -14,10 +14,12 @@ import com.example.snackbarcompose.util.RequestState
 import com.example.snackbarcompose.util.getCelcius
 import com.example.snackbarcompose.util.getDateString
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -201,7 +203,13 @@ class WeatherViewModel @Inject constructor(
             )
             emit(weatherResponse)
         }
+    }.retryWhen { cause, attempt ->
+        println("Enter retry() with $cause")
+        delay(1000 * attempt)
+        cause is NetworkException
     }
+
+    class NetworkException(message: String) : Exception(message)
 
     fun getDayOfTheWeek(date: String): String {
 
