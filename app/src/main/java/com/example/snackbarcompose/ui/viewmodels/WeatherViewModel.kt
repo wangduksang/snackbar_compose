@@ -9,6 +9,7 @@ import com.example.snackbarcompose.data.remote.ListItem
 import com.example.snackbarcompose.data.remote.WeatherResponse
 import com.example.snackbarcompose.data.repositories.WeatherRepository
 import com.example.snackbarcompose.network.WeatherApi
+import com.example.snackbarcompose.ui.screens.dashboard.param.WeatherParam
 import com.example.snackbarcompose.util.Constants.APP_KEY
 import com.example.snackbarcompose.util.RequestState
 import com.example.snackbarcompose.util.getCelcius
@@ -22,16 +23,14 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 import kotlin.math.abs
 
-data class WeatherParam(
-    var longitude: Float,
-    var latitude: Float,
-    val APP_KEY: String,
-)
 
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
@@ -40,8 +39,24 @@ class WeatherViewModel @Inject constructor(
 
 ) : ViewModel() {
 
+    // Seoul     37.5600     126.9900
+    // London    51.5072    -0.1275
+    // Chicago   41.8375    -87.6866
+    val weatherList = arrayListOf<WeatherParam>()
+
+    init {
+
+        weatherList.add(WeatherParam(37.5519F, 126.9918F, APP_KEY))
+        weatherList.add(WeatherParam(51.5072F, -0.1275F, APP_KEY))
+        weatherList.add(WeatherParam(41.8375F, -87.6866F, APP_KEY))
+    }
+
     companion object {
         const val SHOW_LIST_CNT = 5
+
+        const val TODAY = "Today"
+        const val TOMORROW = "Tomorrow"
+
         val locationWeatherList = mutableListOf<LocationWeather>()
         val weatherBufferList: MutableMap<Location, List<Weather>> = mutableMapOf()
         fun getWeatherBufferList(): Int {
@@ -66,7 +81,9 @@ class WeatherViewModel @Inject constructor(
                     tempMax = weather.tempMax
                     tempMin = weather.tempMin
                     state = weather.state
+                    desc = weather.desc
                     dt = weather.dt
+                    dtTxt = weather.dtTxt
                 }
 
                 locationWeatherList.add(locationWeather)
@@ -74,28 +91,17 @@ class WeatherViewModel @Inject constructor(
         }
     }
 
-    // Seoul 37.5600	126.9900
-    // London 51.5072 -0.1275
-    // Chicago 41.8375 -87.6866
-    val weatherList = arrayListOf<WeatherParam>()
-
-    init {
-
-        weatherList.add(WeatherParam(37.5519F, 126.9918F, APP_KEY))
-        weatherList.add(WeatherParam(51.5072F, -0.1275F, APP_KEY))
-        weatherList.add(WeatherParam(41.8375F, -87.6866F, APP_KEY))
-    }
-
-    // hot flow
+    // cold flow
     // mutable to immutable
     private val _allWeatherData =
         MutableStateFlow<RequestState<Map<Location, List<Weather>>>>(RequestState.Idle)
     val allWeatherData: StateFlow<RequestState<Map<Location, List<Weather>>>> = _allWeatherData
 
-    fun bindWeatherDataWithDB() {
+    fun bindWeatherDataWithFlow() {
         _allWeatherData.value = RequestState.Loading
         try {
             viewModelScope.launch {
+                repository.deleteAllData()
                 repository.getAllDataMap.collect {
                     _allWeatherData.value = RequestState.Success(it)
                 }
@@ -108,7 +114,6 @@ class WeatherViewModel @Inject constructor(
     fun requestWeatherApi() {
 
         // check db
-
         viewModelScope.launch {
             // consume
             weatherFlowList.collect { resp ->
@@ -122,7 +127,7 @@ class WeatherViewModel @Inject constructor(
         }
     }
 
-    // 3times
+    // 3 times
     private suspend fun addLocationAndWeatherListToRepo(resp: WeatherResponse) {
 
         val location = Location()
@@ -139,7 +144,60 @@ class WeatherViewModel @Inject constructor(
 
         val weatherHashMap = HashMap<String, ListItem>()
 
+        groupedByDay(resp, weatherHashMap)
+
+        val weatherList = ArrayList<Weather>()
+        weatherHashMap
+            .toList()
+            .take(SHOW_LIST_CNT)
+            .forEach { list ->
+
+                val weather = Weather().apply {
+                    val item = list.second
+                    var main = item.main
+                    var weather = item.weather?.get(0)
+
+                    tempMin = getCelcius(main?.tempMin as Double)
+                    tempMax = getCelcius(main.tempMax as Double)
+
+                    state = weather?.main ?: ""
+                    desc = weather?.description ?: ""
+
+                    dtTxt = item.dtTxt.toString()
+
+                    // yyyy-MM-dd => yyyyMMdd
+                    val squashedDate = dtTxt.take(10).replace("-", "")
+
+                    val strCurrentDate = convertDateAsForSort(squashedDate)
+                    dt = strCurrentDate?.toInt()!!
+                    //dt = convertTime(strCurrentDate)
+                }
+
+                weatherList.add(weather)
+                weatherList.sortByDescending {
+                    it.dt
+                }
+                weatherList.forEach { weather ->
+                    println("weatherItem :  ${weather.dtTxt}")
+                }
+
+            }
+        repository.addLocationAndWeatherList(location = location, weatherList = weatherList)
+    }
+
+    private fun convertDateAsForSort(squashedDate: String): String? {
+        val currentDate =
+            LocalDate.parse(squashedDate, DateTimeFormatter.BASIC_ISO_DATE)
+        val dtf = DateTimeFormatter.ofPattern("ddMMyyyy")
+        return currentDate.format(dtf)
+    }
+
+    private fun groupedByDay(
+        resp: WeatherResponse,
+        weatherHashMap: HashMap<String, ListItem>
+    ) {
         resp.list?.let { list ->
+
             list.map { item ->
                 if (item != null) {
                     item.day = toDay(item)
@@ -152,36 +210,7 @@ class WeatherViewModel @Inject constructor(
                 }
             }
         }
-
-        val weatherList = ArrayList<Weather>()
-        weatherHashMap.toList().take(SHOW_LIST_CNT).forEach { list ->
-
-            val weather = Weather().apply {
-                val item = list.second
-                var main = item.main
-                var weather = item.weather?.get(0)
-
-                tempMin = getCelcius(main?.tempMin as Double)
-                tempMax = getCelcius(main.tempMax as Double)
-
-                state = weather?.main ?: ""
-//                println("tempMin :  $tempMin")
-//                println("tempMax :  $tempMax")
-
-                dt = item.dtTxt.toString()
-            }
-            weatherList.add(weather)
-
-        }
-        repository.addLocationAndWeatherList(location = location, weatherList = weatherList)
     }
-
-//    private suspend fun addLocationToRepo(resp: WeatherResponse): Long {
-//
-//        return repository.addLocation(location = location)
-//    }
-
-    //weatherFlowList.launchIn(viewModelScope)
 
     private fun toDay(listItem: ListItem?): String {
 
@@ -211,15 +240,15 @@ class WeatherViewModel @Inject constructor(
 
     class NetworkException(message: String) : Exception(message)
 
-    fun getDayOfTheWeek(date: String): String {
+    fun getDayOfTheWeek(dateStr: String): String {
 
         val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-        val date = format.parse(date)
+        val date = format.parse(dateStr)
         val dateInfoList = date.toString().split(" ")
 
         val translatedDay = when (getDayAfterToday(date = date)) {
-            0L -> "Today"
-            1L -> "Tomorrow"
+            0L -> TODAY
+            1L -> TOMORROW
             else -> String.format("${dateInfoList[0]} ${dateInfoList[2]} ${dateInfoList[1]}")
         }
 
@@ -231,8 +260,17 @@ class WeatherViewModel @Inject constructor(
 
     private fun getDayAfterToday(date: Date): Long {
         var today = Calendar.getInstance()
-        var calcDate = (today.time.time - date.time) / (60 * 60 * 24 * 1000)
-        println(calcDate)
-        return abs(calcDate)
+        val secOfDay = (60 * 60 * 24 * 1000)
+        val halfSecOfDay = secOfDay / 2
+        val todayFromDate = (today.time.time - date.time)
+        var calcDate = todayFromDate / (60 * 60 * 24 * 1000)
+        println("calcDate $calcDate")
+        if (abs(calcDate) == 0L) {
+            val todayDecision = todayFromDate.toFloat() / halfSecOfDay
+            println("todayDecision $todayDecision")
+            return if (todayDecision > 0L) 1L else 0L
+        } else {
+            return calcDate
+        }
     }
 }

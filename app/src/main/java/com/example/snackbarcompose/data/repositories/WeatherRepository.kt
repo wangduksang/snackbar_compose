@@ -11,7 +11,9 @@ import javax.inject.Inject
 class WeatherRepository @Inject constructor(private val weatherDao: WeatherDao) {
 
     val getAllDataMap: Flow<Map<Location, List<Weather>>> = weatherDao.getAllWeatherData()
-
+    suspend fun deleteAllData(){
+        weatherDao.deleteWeatherData()
+    }
     suspend fun addLocationAndWeatherList(location: Location, weatherList: List<Weather>) =
         weatherDao.addLocationAndWeatherList(location = location, weatherList = weatherList)
 }

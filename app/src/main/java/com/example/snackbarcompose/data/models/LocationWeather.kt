@@ -1,7 +1,5 @@
 package com.example.snackbarcompose.data.models
 
-import androidx.room.ColumnInfo
-
 data class LocationWeather (
     var name: String = "",
     var longitude: Double = 0.0,
@@ -10,5 +8,7 @@ data class LocationWeather (
     var tempMin: Double = 0.0,
     var tempMax: Double = 0.0,
     var state: String = "",
-    var dt: String = "",
+    var desc: String = "",
+    var dt: Int = 0,
+    var dtTxt: String = "",
 )

@@ -5,6 +5,9 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import com.example.snackbarcompose.util.Constants.WEATHER_TABLE
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.Date
 
 @Entity(
     tableName = WEATHER_TABLE,
@@ -26,6 +29,13 @@ data class Weather(
     var tempMax: Double = 0.0,
     @ColumnInfo(name = "state")
     var state: String = "",
+    @ColumnInfo(name = "desc")
+    var desc: String = "",
     @ColumnInfo(name = "dt")
-    var dt: String = "",
+    var dt: Int = 0,
+    @ColumnInfo(name = "dtTxt")
+    var dtTxt: String = "",
 )
+
+
+

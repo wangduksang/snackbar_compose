@@ -3,20 +3,6 @@ package com.example.snackbarcompose.data.models.constance
 import com.example.snackbarcompose.R
 
 enum class WeatherDecorType(val word: String, val icon: Int) {
-//sealed class WeatherDecorType(value : String) {
-//    abstract fun getImage() : Int
-//
-//    class None(value : String) : WeatherDecorType(value) {
-//        override fun getImage(): Int {
-//            return R.drawable.ic_wi_na
-//        }
-//    }
-//
-//    class LightRain(value : String) : WeatherDecorType(value) {
-//        override fun getImage(): Int {
-//            return R.drawable.ic_wi_showers
-//        }
-//    }
 
 //    NONE("", R.drawable.ic_wi_na),
 //    LIGHT_RAIN("light rain", R.drawable.ic_wi_showers),

@@ -1,6 +1,8 @@
 package com.example.snackbarcompose.ui.screens.dashboard
 
 import android.graphics.drawable.Drawable
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -12,11 +14,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Divider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -37,42 +37,46 @@ import com.example.snackbarcompose.data.models.Location
 import com.example.snackbarcompose.data.models.LocationWeather
 import com.example.snackbarcompose.data.models.Weather
 import com.example.snackbarcompose.data.models.constance.WeatherDecorType
-import com.example.snackbarcompose.ui.theme.DarkGray
 import com.example.snackbarcompose.ui.theme.LowPriorityColor
 import com.example.snackbarcompose.ui.theme.MediumGray
 import com.example.snackbarcompose.ui.viewmodels.WeatherViewModel
 import com.example.snackbarcompose.ui.viewmodels.WeatherViewModel.Companion.locationWeatherList
-import com.example.snackbarcompose.ui.viewmodels.WeatherViewModel.Companion.weatherBufferList
 import com.example.snackbarcompose.util.Constants.MEDIUM_PADDING
 import com.example.snackbarcompose.util.RequestState
 import com.example.snackbarcompose.util.U_CODE_CELCIUS
 import kotlin.math.roundToInt
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WeatherContent(weatherViewModel: WeatherViewModel) {
-
+    var weatherStateCnt = 0
     val weatherState by weatherViewModel.allWeatherData.collectAsState()
-
+    weatherStateCnt++
+    println("weatherStateCnt $weatherStateCnt")
     if (weatherState is RequestState.Success) {
         val weatherListMap =
             (weatherState as RequestState.Success<Map<Location, List<Weather>>>).data
-        //println("data.size => ${data.size}")
+
+        weatherListMap.forEach { (_, weatherList) ->
+            println("weatherBufferList ${weatherList.size}")
+        }
+
         //weatherBufferList.putAll(weatherList)
         weatherViewModel.convertToList(weatherListMap)
 
         val groupedItem = locationWeatherList.groupBy {
             it.name
         }
-        println("weatherBufferList ${weatherBufferList.size}")
+
         val state = rememberLazyListState()
         LazyColumn {
 
             groupedItem.forEach { (location, weatherList) ->
                 val lastIdx = weatherList.lastIndex
-                println("draw lazy column")
+                println("draw lazy column $location")
+                println("weather list.size => ${weatherList.size}")
 
-                //println("location : ${location.name} weather list.size => ${weatherList.size}")
                 stickyHeader {
                     Divider(
                         modifier = Modifier.height(MEDIUM_PADDING),
@@ -121,7 +125,7 @@ private fun WeatherListItem(
 
     var isLoading by remember { mutableStateOf(true) }
 
-    val sortedDate = weatherViewModel.getDayOfTheWeek(item.dt)
+    val sortedDate = weatherViewModel.getDayOfTheWeek(item.dtTxt)
     println("sortedDate => $sortedDate")
 
     println("index => $index lastIdx => $lastIdx")
@@ -191,11 +195,12 @@ private fun WeatherListItem(
                 //Text(modifier = Modifier.align(Alignment.TopStart), text = "1")
 
                 Text(
-                    text = item.state,
+                    text = item.desc,
                     color = Color.Black,
                     modifier = Modifier
                         .background(Color.White)
-                        .padding(5.dp)
+                        .padding(3.dp)
+                        .fillMaxWidth(100F)
                         .align(Alignment.BottomStart)
                 )
 
@@ -204,7 +209,7 @@ private fun WeatherListItem(
                     color = Color.Black,
                     modifier = Modifier
                         .background(Color.White)
-                        .padding(5.dp)
+                        .padding(3.dp)
                         .align(Alignment.BottomCenter)
                 )
 
@@ -213,7 +218,7 @@ private fun WeatherListItem(
                     color = Color.Black,
                     modifier = Modifier
                         .background(Color.White)
-                        .padding(5.dp)
+                        .padding(3.dp)
                         .align(Alignment.BottomEnd)
                 )
             }
@@ -228,7 +233,7 @@ private fun WeatherListItem(
 }
 
 private fun getImageUrl(item: LocationWeather): Int {
-    println("item.state => $item.state")
+
     val imageUrl = when (item.state) {
         WeatherDecorType.LIGHT_RAIN.word -> WeatherDecorType.LIGHT_RAIN.icon
         WeatherDecorType.BROKEN_CLOUDS.word -> WeatherDecorType.BROKEN_CLOUDS.icon
