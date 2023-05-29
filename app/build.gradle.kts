@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.snackbarcompose"
+    namespace = "com.example.weathercompose"
     compileSdk = 33
 
     defaultConfig {
-        applicationId = "com.example.snackbarcompose"
+        applicationId = "com.example.weathercompose"
         minSdk = 26
         targetSdk = 33
         versionCode = 1
